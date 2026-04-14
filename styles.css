@@ -175,6 +175,14 @@ body {
   gap: var(--space-1);
 }
 
+/* Toolbar Logo */
+.toolbar-logo {
+  height: 32px;
+  width: auto;
+  margin-right: var(--space-2);
+  object-fit: contain;
+}
+
 /* Toolbar Button */
 .toolbar-btn {
   display: flex;
@@ -390,8 +398,8 @@ body {
 
 /* ---------- SIDEBAR ---------- */
 .sidebar {
-  width: 200px;
-  min-width: 200px;
+  width: 220px;
+  min-width: 220px;
   background: var(--color-sidebar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);

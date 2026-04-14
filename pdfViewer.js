@@ -265,7 +265,6 @@ class PDFViewer {
     }
     
     sidebarContent.innerHTML = '';
-    console.log(`Generating thumbnails for ${totalPages} pages`);
 
     // Generate thumbnails in batches for performance
     const batchSize = 5;
@@ -280,15 +279,10 @@ class PDFViewer {
       const thumbnails = await Promise.all(promises);
       thumbnails.forEach(({ pageNum, canvas }) => {
         if (canvas) {
-          console.log(`Adding thumbnail for page ${pageNum}`);
           this._addThumbnailToSidebar(pageNum, canvas);
-        } else {
-          console.warn(`Failed to generate thumbnail for page ${pageNum}`);
         }
       });
     }
-    
-    console.log('Thumbnail generation complete');
   }
 
   /**
@@ -330,7 +324,6 @@ class PDFViewer {
    */
   _addThumbnailToSidebar(pageNum, canvas) {
     const sidebarContent = document.getElementById('sidebar-content');
-    console.log(`Sidebar content element:`, sidebarContent);
 
     const thumbnailItem = document.createElement('div');
     thumbnailItem.className = 'thumbnail-item';
@@ -346,8 +339,6 @@ class PDFViewer {
     const sourceCtx = canvas.getContext('2d');
     const destCtx = displayCanvas.getContext('2d');
     destCtx.drawImage(sourceCtx.canvas, 0, 0);
-    
-    console.log(`Thumbnail ${pageNum} canvas size: ${canvas.width}x${canvas.height}`);
 
     const label = document.createElement('div');
     label.className = 'thumbnail-label';
@@ -362,7 +353,6 @@ class PDFViewer {
     });
 
     sidebarContent.appendChild(thumbnailItem);
-    console.log(`Thumbnail appended. Total thumbnails in sidebar:`, sidebarContent.children.length);
 
     // Mark active page
     if (pageNum === AppState.get('currentPage')) {

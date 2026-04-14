@@ -168,7 +168,6 @@ class App {
     });
     
     AppState.subscribe('sidebarVisible', (visible) => {
-      console.log('Sidebar visibility changed:', visible);
       this.elements.sidebar.classList.toggle('hidden', !visible);
     });
     
