@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExamBank PDF Viewer</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  
+  <!-- PDF.js -->
+  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- App Container -->
+  <div id="app">
+    
+    <!-- Header Toolbar -->
+    <header class="toolbar" id="toolbar">
+      <div class="toolbar-left">
+        <button class="toolbar-btn" id="btn-sidebar" title="Toggle Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+        </button>
+        <div class="file-info">
+          <svg class="file-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <span class="file-name" id="file-name">No file loaded</span>
+        </div>
+      </div>
+      
+      <div class="toolbar-center">
+        <div class="page-nav">
+          <button class="toolbar-btn" id="btn-prev-page" title="Previous Page" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <div class="page-indicator">
+            <input type="number" id="page-input" min="1" value="1" disabled />
+            <span class="page-separator">/</span>
+            <span id="page-total">0</span>
+          </div>
+          <button class="toolbar-btn" id="btn-next-page" title="Next Page" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="toolbar-right">
+        <div class="zoom-controls">
+          <button class="toolbar-btn" id="btn-zoom-out" title="Zoom Out" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+          </button>
+          <select id="zoom-select" class="zoom-select" disabled>
+            <option value="0.5">50%</option>
+            <option value="0.75">75%</option>
+            <option value="1" selected>100%</option>
+            <option value="1.25">125%</option>
+            <option value="1.5">150%</option>
+            <option value="2">200%</option>
+            <option value="fit-width">Fit Width</option>
+            <option value="fit-page">Fit Page</option>
+          </select>
+          <button class="toolbar-btn" id="btn-zoom-in" title="Zoom In" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="11" y1="8" x2="11" y2="14"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+          </button>
+        </div>
+        
+        <button class="toolbar-btn" id="btn-search" title="Search (Ctrl+F)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        
+        <button class="toolbar-btn" id="btn-bookmark" title="Bookmark Page" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+        </button>
+        
+        <button class="toolbar-btn" id="btn-fullscreen" title="Fullscreen">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+        
+        <button class="toolbar-btn" id="btn-theme" title="Toggle Theme">
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <!-- Search Bar (Hidden by default) -->
+    <div class="search-bar hidden" id="search-bar">
+      <div class="search-container">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search in document..." />
+        <div class="search-results" id="search-results">
+          <span class="search-count" id="search-count">0/0</span>
+          <button class="toolbar-btn" id="btn-prev-match" title="Previous Match" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"/>
+            </svg>
+          </button>
+          <button class="toolbar-btn" id="btn-next-match" title="Next Match" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+        </div>
+        <button class="toolbar-btn" id="btn-close-search" title="Close Search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Sidebar (Thumbnails) -->
+      <aside class="sidebar hidden" id="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title">Pages</span>
+        </div>
+        <div class="sidebar-content" id="sidebar-content">
+          <!-- Thumbnails will be injected here -->
+        </div>
+      </aside>
+      
+      <!-- PDF Viewer -->
+      <div class="viewer-container" id="viewer-container">
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-state-content">
+            <div class="empty-state-icon">
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <h2 class="empty-state-title">Open a PDF to get started</h2>
+            <p class="empty-state-description">Drag & drop a PDF file here or click the button below to open</p>
+            <button class="btn-primary" id="btn-open-file">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              Open PDF
+            </button>
+            <input type="file" id="file-input" accept=".pdf" class="hidden" />
+          </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div class="loading-state hidden" id="loading-state">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p class="loading-text">Loading PDF...</p>
+          </div>
+        </div>
+        
+        <!-- PDF Canvas Container -->
+        <div class="pdf-viewer hidden" id="pdf-viewer">
+          <div class="pdf-scroll-container" id="pdf-scroll-container">
+            <canvas id="pdf-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+  </div>
+  
+  <!-- Hidden file input for opening PDF -->
+  <input type="file" id="hidden-file-input" accept=".pdf" class="hidden" />
+  
+  <!-- Drop Overlay -->
+  <div class="drop-overlay" id="drop-overlay">
+    <div class="drop-overlay-content">
+      <div class="drop-overlay-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <path d="M12 18v-6"/>
+          <path d="M9 15l3 3 3-3"/>
+        </svg>
+      </div>
+      <div class="drop-overlay-title">Drop PDF here</div>
+      <div class="drop-overlay-description">Release to open your document</div>
+    </div>
+  </div>
+  
+  <!-- Application Scripts -->
+  <script src="stateManager.js"></script>
+  <script src="pdfViewer.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
