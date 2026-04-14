@@ -8,8 +8,8 @@ class PDFViewer {
     this.ctx = this.canvas.getContext('2d');
     this.container = document.getElementById('pdf-scroll-container');
     
-    // Configure PDF.js worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    // Configure PDF.js worker (local copy)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'lib/pdf.worker.min.js';
     
     // Cache for rendered pages
     this.pageCache = new Map();
@@ -315,29 +315,36 @@ class PDFViewer {
    */
   _addThumbnailToSidebar(pageNum, canvas) {
     const sidebarContent = document.getElementById('sidebar-content');
-    
+
     const thumbnailItem = document.createElement('div');
     thumbnailItem.className = 'thumbnail-item';
     thumbnailItem.dataset.pageNum = pageNum;
-    
-    // Clone canvas for display
-    const displayCanvas = canvas.cloneNode();
+
+    // Clone canvas and copy the rendered content
+    const displayCanvas = document.createElement('canvas');
     displayCanvas.className = 'thumbnail-canvas';
+    displayCanvas.width = canvas.width;
+    displayCanvas.height = canvas.height;
     
+    // Copy the image data from the source canvas
+    const sourceCtx = canvas.getContext('2d');
+    const destCtx = displayCanvas.getContext('2d');
+    destCtx.drawImage(sourceCtx.canvas, 0, 0);
+
     const label = document.createElement('div');
     label.className = 'thumbnail-label';
     label.textContent = pageNum.toString();
-    
+
     thumbnailItem.appendChild(displayCanvas);
     thumbnailItem.appendChild(label);
-    
+
     // Click to navigate
     thumbnailItem.addEventListener('click', () => {
       this.goToPage(pageNum);
     });
-    
+
     sidebarContent.appendChild(thumbnailItem);
-    
+
     // Mark active page
     if (pageNum === AppState.get('currentPage')) {
       thumbnailItem.classList.add('active');
