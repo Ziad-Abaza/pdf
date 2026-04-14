@@ -168,6 +168,7 @@ class App {
     });
     
     AppState.subscribe('sidebarVisible', (visible) => {
+      console.log('Sidebar visibility changed:', visible);
       this.elements.sidebar.classList.toggle('hidden', !visible);
     });
     
@@ -256,25 +257,28 @@ class App {
     try {
       // Show loading state
       this.showLoadingState();
-      
+
       // Reset state
       AppState.resetDocumentState();
       this.pdfViewer.destroy();
-      
+
       // Load document
       await this.pdfViewer.loadFromFile(file);
-      
-      // Show viewer
+
+      // Show viewer and sidebar
       this.showViewerState();
       
+      // Auto-show sidebar for better UX
+      AppState.set('sidebarVisible', true);
+
       // Update zoom controls
       this.elements.btnZoomIn.disabled = false;
       this.elements.btnZoomOut.disabled = false;
       this.elements.zoomSelect.disabled = false;
       this.elements.btnBookmark.disabled = false;
-      
+
       this.showToast(`Loaded: ${file.name}`, 'success');
-      
+
     } catch (error) {
       console.error('Failed to load PDF:', error);
       this.showEmptyState();

@@ -251,29 +251,44 @@ class PDFViewer {
    */
   async generateThumbnails() {
     const pdfDoc = AppState.get('pdfDoc');
-    if (!pdfDoc) return;
-    
+    if (!pdfDoc) {
+      console.warn('No PDF doc available for thumbnails');
+      return;
+    }
+
     const totalPages = AppState.get('totalPages');
     const sidebarContent = document.getElementById('sidebar-content');
-    sidebarContent.innerHTML = '';
     
+    if (!sidebarContent) {
+      console.error('Sidebar content element not found');
+      return;
+    }
+    
+    sidebarContent.innerHTML = '';
+    console.log(`Generating thumbnails for ${totalPages} pages`);
+
     // Generate thumbnails in batches for performance
     const batchSize = 5;
     for (let i = 0; i < totalPages; i += batchSize) {
       const batchEnd = Math.min(i + batchSize, totalPages);
-      
+
       const promises = [];
       for (let pageNum = i + 1; pageNum <= batchEnd; pageNum++) {
         promises.push(this._generateThumbnail(pageNum));
       }
-      
+
       const thumbnails = await Promise.all(promises);
       thumbnails.forEach(({ pageNum, canvas }) => {
         if (canvas) {
+          console.log(`Adding thumbnail for page ${pageNum}`);
           this._addThumbnailToSidebar(pageNum, canvas);
+        } else {
+          console.warn(`Failed to generate thumbnail for page ${pageNum}`);
         }
       });
     }
+    
+    console.log('Thumbnail generation complete');
   }
 
   /**
@@ -315,6 +330,7 @@ class PDFViewer {
    */
   _addThumbnailToSidebar(pageNum, canvas) {
     const sidebarContent = document.getElementById('sidebar-content');
+    console.log(`Sidebar content element:`, sidebarContent);
 
     const thumbnailItem = document.createElement('div');
     thumbnailItem.className = 'thumbnail-item';
@@ -330,10 +346,12 @@ class PDFViewer {
     const sourceCtx = canvas.getContext('2d');
     const destCtx = displayCanvas.getContext('2d');
     destCtx.drawImage(sourceCtx.canvas, 0, 0);
+    
+    console.log(`Thumbnail ${pageNum} canvas size: ${canvas.width}x${canvas.height}`);
 
     const label = document.createElement('div');
     label.className = 'thumbnail-label';
-    label.textContent = pageNum.toString();
+    label.textContent = `Page ${pageNum}`;
 
     thumbnailItem.appendChild(displayCanvas);
     thumbnailItem.appendChild(label);
@@ -344,6 +362,7 @@ class PDFViewer {
     });
 
     sidebarContent.appendChild(thumbnailItem);
+    console.log(`Thumbnail appended. Total thumbnails in sidebar:`, sidebarContent.children.length);
 
     // Mark active page
     if (pageNum === AppState.get('currentPage')) {
